@@ -5,7 +5,7 @@ use crate::job::JobControl;
 use crate::outbox::Outbox;
 use crate::registrar::Registrar;
 use crate::scene::{Scene, SceneId};
-use crossterm::event::KeyEvent;
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use n_mcconsole_core::config::Config;
 use n_mcconsole_core::message::Envelope;
 use ratatui::Frame;
@@ -99,6 +99,15 @@ impl App {
     }
 
     pub fn handle_input(&mut self, key: KeyEvent) {
+        let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
+        match (ctrl, key.code) {
+            (true, KeyCode::Char('c')) => {
+                self.apply(SceneId(0), Action::Quit);
+                return;
+            }
+            (_, _) => {}
+        }
+
         let Some(&top) = self.order.last() else {
             return;
         };
