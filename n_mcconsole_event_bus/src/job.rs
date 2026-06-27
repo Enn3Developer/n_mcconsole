@@ -7,7 +7,13 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 pub trait Job: Send + 'static {
-    fn run(self, tag: u64, writer: EventWriter, executor: Arc<dyn Executor>, token: JobToken);
+    fn run(
+        self,
+        tag: u64,
+        writer: EventWriter,
+        executor: Arc<dyn Executor>,
+        token: Option<JobToken>,
+    );
 }
 
 #[macro_export]
@@ -87,10 +93,19 @@ impl JobControl {
         };
 
         thread::spawn(move || {
-            job.run(tag, writer, exec, token);
+            job.run(tag, writer, exec, Some(token));
         });
 
         JobHandle { stop, killer }
+    }
+
+    pub fn spawn_detached<J: Job>(&self, job: J, tag: u64) {
+        let exec = self.executor.clone();
+        let writer = self.writer.clone();
+
+        thread::spawn(move || {
+            job.run(tag, writer, exec, None);
+        });
     }
 
     pub fn start<J: Job>(&self, job: J) -> RunningJob {
@@ -98,8 +113,14 @@ impl JobControl {
         let handle = self.spawn_job(job, tag);
         RunningJob {
             tag,
-            handle: Some(handle),
+            _handle: Some(handle),
         }
+    }
+
+    pub fn start_detached<J: Job>(&self, job: J) -> RunningJob {
+        let tag = self.next_id();
+        self.spawn_detached(job, tag);
+        RunningJob { tag, _handle: None }
     }
 }
 
@@ -138,7 +159,7 @@ impl Drop for JobHandle {
 
 pub struct RunningJob {
     tag: u64,
-    handle: Option<JobHandle>,
+    _handle: Option<JobHandle>,
 }
 
 impl RunningJob {

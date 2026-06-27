@@ -10,7 +10,14 @@ pub struct McCommandSenderJob;
 job_emits!(McCommandSenderJob => Tagged<McCommandSentMessage>);
 
 impl Job for McCommandSenderJob {
-    fn run(self, tag: u64, writer: EventWriter, executor: Arc<dyn Executor>, token: JobToken) {}
+    fn run(
+        self,
+        _tag: u64,
+        _writer: EventWriter,
+        _executor: Arc<dyn Executor>,
+        _token: Option<JobToken>,
+    ) {
+    }
 }
 
 pub struct McCommandSentMessage;

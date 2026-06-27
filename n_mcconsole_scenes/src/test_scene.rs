@@ -22,11 +22,11 @@ impl Scene for TestScene {
         ListDirJob::subscribe(registrar);
     }
 
-    fn handle_key(&mut self, key: KeyEvent, ctx: &Ctx, out: &mut Outbox) -> Action {
+    fn handle_key(&mut self, _key: KeyEvent, _ctx: &Ctx, _out: &mut Outbox) -> Action {
         Action::None
     }
 
-    fn view(&self, f: &mut Frame, area: Rect, ctx: &Ctx) {
+    fn view(&self, f: &mut Frame, area: Rect, _ctx: &Ctx) {
         f.render_widget(List::new(self.files.clone()), area);
     }
 

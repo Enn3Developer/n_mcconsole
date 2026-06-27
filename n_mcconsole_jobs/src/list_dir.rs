@@ -3,7 +3,6 @@ use n_mcconsole_core::message::Tagged;
 use n_mcconsole_event_bus::event::EventWriter;
 use n_mcconsole_event_bus::job::{Job, JobToken};
 use n_mcconsole_event_bus::job_emits;
-use std::any::TypeId;
 use std::sync::Arc;
 
 pub struct ListDirJob {
@@ -19,7 +18,13 @@ impl ListDirJob {
 }
 
 impl Job for ListDirJob {
-    fn run(self, tag: u64, writer: EventWriter, executor: Arc<dyn Executor>, _token: JobToken) {
+    fn run(
+        self,
+        tag: u64,
+        writer: EventWriter,
+        executor: Arc<dyn Executor>,
+        _token: Option<JobToken>,
+    ) {
         let Ok(files) = executor.list_dir(&self.path) else {
             return;
         };
