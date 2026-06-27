@@ -100,12 +100,9 @@ impl App {
 
     pub fn handle_input(&mut self, key: KeyEvent) {
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
-        match (ctrl, key.code) {
-            (true, KeyCode::Char('c')) => {
-                self.apply(SceneId(0), Action::Quit);
-                return;
-            }
-            (_, _) => {}
+        if let (true, KeyCode::Char('c')) = (ctrl, key.code) {
+            self.apply(SceneId(0), Action::Quit);
+            return;
         }
 
         let Some(&top) = self.order.last() else {
