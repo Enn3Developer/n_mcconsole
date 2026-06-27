@@ -10,6 +10,20 @@ pub trait Job: Send + 'static {
     fn run(self, tag: u64, writer: EventWriter, executor: Arc<dyn Executor>);
 }
 
+#[macro_export]
+macro_rules! job_emits {
+    ($job:ty => $($msg:ty),+ $(,)?) => {
+        impl $job {
+            pub fn subscribe<S>(reg: &mut $crate::registrar::Registrar<S>)
+            where
+                S: $crate::scene::Scene $(+ $crate::Handle<$msg>)+,
+            {
+                $( reg.on::<$msg>(); )+
+            }
+        }
+    };
+}
+
 #[derive(Clone)]
 pub struct JobControl {
     pub writer: EventWriter,
