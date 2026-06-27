@@ -36,7 +36,9 @@ fn main() -> io::Result<()> {
     };
 
     let mut app = App::new(Config {}, jobs);
-    let tabs = TabBuilder::new(&mut app).add_tab(TestScene, "Test").build();
+    let tabs = TabBuilder::new(&mut app)
+        .add_tab(TestScene::default(), "Test")
+        .build();
     let tabbed_scene = TabbedScene::new(tabs);
     app.push_scene(tabbed_scene);
 

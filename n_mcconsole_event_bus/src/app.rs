@@ -185,7 +185,8 @@ impl App {
                     continue;
                 };
 
-                t(s.as_mut(), &envelope.payload, &ctx, &mut out);
+                // &* here means to dereference through the Box so we get the internal data
+                t(s.as_mut(), &*envelope.payload, &ctx, &mut out);
             }
 
             queue.extend(out.pending.drain(..));
