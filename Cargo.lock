@@ -691,6 +691,10 @@ dependencies = [
 [[package]]
 name = "n_mcconsole_jobs"
 version = "0.1.0"
+dependencies = [
+ "n_mcconsole_core",
+ "n_mcconsole_event_bus",
+]
 
 [[package]]
 name = "n_mcconsole_scenes"
