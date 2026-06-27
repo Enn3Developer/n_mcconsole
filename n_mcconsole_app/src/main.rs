@@ -12,6 +12,8 @@ use n_mcconsole_event_bus::job::JobControl;
 use n_mcconsole_executor::local::LocalExecutor;
 use n_mcconsole_executor::remote::SshExecutor;
 use n_mcconsole_executor::{Target, parse_target};
+use n_mcconsole_scenes::tabbed_scene::{TabBuilder, TabbedScene};
+use n_mcconsole_scenes::test_scene::TestScene;
 use std::io;
 use std::sync::Arc;
 use std::sync::atomic::AtomicU64;
@@ -34,6 +36,9 @@ fn main() -> io::Result<()> {
     };
 
     let mut app = App::new(Config {}, jobs);
+    let tabs = TabBuilder::new(&mut app).add_tab(TestScene, "Test").build();
+    let tabbed_scene = TabbedScene::new(tabs);
+    app.push_scene(tabbed_scene);
 
     let prev = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |info| {

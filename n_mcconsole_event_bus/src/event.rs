@@ -1,5 +1,5 @@
 use crossterm::event::{self, Event as CtEvent, KeyEvent, KeyEventKind};
-use n_mcconsole_core::message::{Envelope, Message};
+use n_mcconsole_core::message::{Envelope, Message, Tagged};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, RecvError, SendError, Sender};
 use std::thread;
@@ -34,6 +34,14 @@ impl EventWriter {
 
     pub fn bus<T: Message>(&self, msg: T) -> Result<(), SendError<Event>> {
         self.tx.send(Event::Bus(Envelope::new(msg)))
+    }
+
+    pub fn bus_tagged<P: Send + 'static>(
+        &self,
+        tag: u64,
+        payload: P,
+    ) -> Result<(), SendError<Event>> {
+        self.bus(Tagged::new(tag, payload))
     }
 
     pub fn tick(&self) -> Result<(), SendError<Event>> {

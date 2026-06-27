@@ -2,21 +2,34 @@ use std::any::{Any, TypeId};
 
 pub trait Message: Any + Send {}
 
+pub struct Tagged<P> {
+    tag: u64,
+    payload: P,
+}
+
+impl<P> Tagged<P> {
+    pub fn new(tag: u64, payload: P) -> Self {
+        Self { tag, payload }
+    }
+
+    pub fn open(&self, tag: u64) -> Option<&P> {
+        (tag == self.tag).then_some(&self.payload)
+    }
+}
+
+impl<P: Send + 'static> Message for Tagged<P> {}
+
 pub struct Tick;
 
 pub struct LogLine {
-    pub tag: u64,
     pub line: String,
 }
 
 pub struct JobDone {
-    pub tag: u64,
     pub ok: bool,
 }
 
 impl Message for Tick {}
-impl Message for LogLine {}
-impl Message for JobDone {}
 
 pub struct Envelope {
     pub tid: TypeId,

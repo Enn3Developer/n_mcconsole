@@ -52,7 +52,7 @@ impl JobControl {
                     }
                     match line {
                         Ok(l) => {
-                            if writer.bus(LogLine { tag, line: l }).is_err() {
+                            if writer.bus_tagged(tag, LogLine { line: l }).is_err() {
                                 break;
                             }
                         }
@@ -60,7 +60,7 @@ impl JobControl {
                     }
                 }
             }
-            let _ = writer.bus(JobDone { tag, ok: true });
+            let _ = writer.bus_tagged(tag, JobDone { ok: true });
         });
 
         JobHandle { stop, killer }
@@ -71,7 +71,7 @@ impl JobControl {
         let writer = self.writer.clone();
         thread::spawn(move || {
             let ok = exec.run(&cmd).map(|o| o.success).unwrap_or(false);
-            let _ = writer.bus(JobDone { tag, ok });
+            let _ = writer.bus_tagged(tag, JobDone { ok });
         });
     }
 
