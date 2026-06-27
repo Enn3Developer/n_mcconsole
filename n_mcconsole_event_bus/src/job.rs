@@ -6,8 +6,8 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-pub trait Job {
-    fn run(self);
+pub trait Job: Send + 'static {
+    fn run(self, tag: u64, writer: EventWriter, executor: Arc<dyn Executor>);
 }
 
 #[derive(Clone)]
@@ -58,6 +58,14 @@ impl JobControl {
         thread::spawn(move || {
             let ok = exec.run(&cmd).map(|o| o.success).unwrap_or(false);
             let _ = writer.bus(JobDone { tag, ok });
+        });
+    }
+
+    pub fn spawn_job<J: Job>(&self, job: J, tag: u64) {
+        let exec = self.executor.clone();
+        let writer = self.writer.clone();
+        thread::spawn(move || {
+            job.run(tag, writer, exec);
         });
     }
 }
