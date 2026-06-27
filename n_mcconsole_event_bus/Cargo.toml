@@ -1,0 +1,9 @@
+[package]
+name = "n_mcconsole_event_bus"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+n_mcconsole_core = { path = "../n_mcconsole_core" }
+crossterm.workspace = true
+ratatui.workspace = true

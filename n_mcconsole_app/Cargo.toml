@@ -1,0 +1,12 @@
+[package]
+name = "n_mcconsole_app"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+n_mcconsole_core = { path = "../n_mcconsole_core" }
+n_mcconsole_executor = { path = "../n_mcconsole_executor" }
+n_mcconsole_event_bus = { path = "../n_mcconsole_event_bus" }
+n_mcconsole_scenes = { path = "../n_mcconsole_scenes" }
+crossterm.workspace = true
+ratatui.workspace = true

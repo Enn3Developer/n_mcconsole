@@ -1,0 +1,7 @@
+[package]
+name = "n_mcconsole_executor"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+n_mcconsole_core = { path = "../n_mcconsole_core" }
