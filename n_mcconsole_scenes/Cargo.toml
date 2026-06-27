@@ -6,6 +6,7 @@ version.workspace = true
 [dependencies]
 n_mcconsole_core = { path = "../n_mcconsole_core" }
 n_mcconsole_executor = { path = "../n_mcconsole_executor" }
+n_mcconsole_jobs = { path = "../n_mcconsole_jobs" }
 n_mcconsole_event_bus = { path = "../n_mcconsole_event_bus" }
 crossterm.workspace = true
 ratatui.workspace = true

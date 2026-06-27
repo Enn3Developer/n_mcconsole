@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/n_mcconsole_core/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/n_mcconsole_event_bus/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/n_mcconsole_executor/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/n_mcconsole_jobs/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/n_mcconsole_scenes/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/n_mcconsole_event_bus/src" isTestSource="false" />

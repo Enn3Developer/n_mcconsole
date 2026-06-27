@@ -4,6 +4,7 @@ members = [
     "n_mcconsole_core",
     "n_mcconsole_event_bus",
     "n_mcconsole_executor",
+    "n_mcconsole_jobs",
     "n_mcconsole_scenes",
 ]
 resolver = "3"

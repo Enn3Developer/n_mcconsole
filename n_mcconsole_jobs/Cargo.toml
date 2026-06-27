@@ -1,0 +1,6 @@
+[package]
+name = "n_mcconsole_jobs"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
