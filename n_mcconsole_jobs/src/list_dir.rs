@@ -24,7 +24,6 @@ impl Job for ListDirJob {
             return;
         };
 
-        eprintln!("job-side  {:?}", TypeId::of::<Tagged<ListDirMessage>>());
         let _ = writer.bus_tagged(tag, ListDirMessage { files });
     }
 }
