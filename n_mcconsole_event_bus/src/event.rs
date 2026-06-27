@@ -1,6 +1,7 @@
 use crossterm::event::{self, Event as CtEvent, KeyEvent, KeyEventKind};
-use n_mcconsole_core::message::Envelope;
-use std::sync::mpsc::Sender;
+use n_mcconsole_core::message::{Envelope, Message};
+use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, RecvError, SendError, Sender};
 use std::thread;
 use std::time::Duration;
 
@@ -11,17 +12,56 @@ pub enum Event {
     Resize,
 }
 
-pub fn spawn_input(tx: Sender<Event>) {
+pub struct EventReader {
+    pub(crate) rx: Receiver<Event>,
+}
+
+impl EventReader {
+    pub fn read(&self) -> Result<Event, RecvError> {
+        self.rx.recv()
+    }
+}
+
+#[derive(Clone)]
+pub struct EventWriter {
+    pub(crate) tx: Sender<Event>,
+}
+
+impl EventWriter {
+    pub fn input(&self, key: KeyEvent) -> Result<(), SendError<Event>> {
+        self.tx.send(Event::Input(key))
+    }
+
+    pub fn bus<T: Message>(&self, msg: T) -> Result<(), SendError<Event>> {
+        self.tx.send(Event::Bus(Envelope::new(msg)))
+    }
+
+    pub fn tick(&self) -> Result<(), SendError<Event>> {
+        self.tx.send(Event::Tick)
+    }
+
+    pub fn resize(&self) -> Result<(), SendError<Event>> {
+        self.tx.send(Event::Resize)
+    }
+}
+
+pub fn create_event_channel() -> (EventWriter, EventReader) {
+    let (tx, rx) = mpsc::channel::<Event>();
+
+    (EventWriter { tx }, EventReader { rx })
+}
+
+pub fn spawn_input(writer: EventWriter) {
     thread::spawn(move || {
         loop {
             match event::read() {
                 Ok(CtEvent::Key(k)) if k.kind == KeyEventKind::Press => {
-                    if tx.send(Event::Input(k)).is_err() {
+                    if writer.input(k).is_err() {
                         break;
                     }
                 }
                 Ok(CtEvent::Resize(_, _)) => {
-                    if tx.send(Event::Resize).is_err() {
+                    if writer.resize().is_err() {
                         break;
                     }
                 }
@@ -32,11 +72,11 @@ pub fn spawn_input(tx: Sender<Event>) {
     });
 }
 
-pub fn spawn_ticker(tx: Sender<Event>, period: Duration) {
+pub fn spawn_ticker(writer: EventWriter, period: Duration) {
     thread::spawn(move || {
         loop {
             thread::sleep(period);
-            if tx.send(Event::Tick).is_err() {
+            if writer.tick().is_err() {
                 break;
             }
         }

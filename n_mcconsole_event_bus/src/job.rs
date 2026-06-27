@@ -1,15 +1,18 @@
-use crate::event::Event;
+use crate::event::EventWriter;
 use n_mcconsole_core::command::Command;
 use n_mcconsole_core::executor::Executor;
-use n_mcconsole_core::message::{Envelope, JobDone, LogLine};
+use n_mcconsole_core::message::{JobDone, LogLine};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+pub trait Job {
+    fn run(self);
+}
+
 #[derive(Clone)]
 pub struct JobControl {
-    pub tx: Sender<Event>,
+    pub writer: EventWriter,
     pub executor: Arc<dyn Executor>,
     pub next: Arc<AtomicU64>,
 }
@@ -21,7 +24,7 @@ impl JobControl {
 
     pub fn spawn_stream(&self, cmd: Command, tag: u64) -> JobHandle {
         let exec = self.executor.clone();
-        let tx = self.tx.clone();
+        let writer = self.writer.clone();
         let stop = Arc::new(AtomicBool::new(false));
         let killer: Arc<Mutex<Option<std::process::Child>>> = Arc::new(Mutex::new(None));
         let (stop_t, killer_t) = (stop.clone(), killer.clone());
@@ -35,10 +38,7 @@ impl JobControl {
                     }
                     match line {
                         Ok(l) => {
-                            if tx
-                                .send(Event::Bus(Envelope::new(LogLine { tag, line: l })))
-                                .is_err()
-                            {
+                            if writer.bus(LogLine { tag, line: l }).is_err() {
                                 break;
                             }
                         }
@@ -46,7 +46,7 @@ impl JobControl {
                     }
                 }
             }
-            let _ = tx.send(Event::Bus(Envelope::new(JobDone { tag, ok: true })));
+            let _ = writer.bus(JobDone { tag, ok: true });
         });
 
         JobHandle { stop, killer }
@@ -54,10 +54,10 @@ impl JobControl {
 
     pub fn spawn_oneshot(&self, cmd: Command, tag: u64) {
         let exec = self.executor.clone();
-        let tx = self.tx.clone();
+        let writer = self.writer.clone();
         thread::spawn(move || {
             let ok = exec.run(&cmd).map(|o| o.success).unwrap_or(false);
-            let _ = tx.send(Event::Bus(Envelope::new(JobDone { tag, ok })));
+            let _ = writer.bus(JobDone { tag, ok });
         });
     }
 }
