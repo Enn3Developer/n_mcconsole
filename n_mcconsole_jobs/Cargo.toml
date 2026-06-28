@@ -6,3 +6,5 @@ version.workspace = true
 [dependencies]
 n_mcconsole_core = { path = "../n_mcconsole_core" }
 n_mcconsole_event_bus = { path = "../n_mcconsole_event_bus" }
+reqwest.workspace = true
+serde.workspace = true
