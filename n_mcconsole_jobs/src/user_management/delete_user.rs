@@ -29,10 +29,12 @@ impl Job for DeleteUserJob {
         _token: Option<JobToken>,
     ) {
         let Ok(output) = executor.run(&Command::new("pkexec").arg(HELPER).arg(&self.user)) else {
+            let _ = writer.bus_tagged(tag, DeleteUserMessage::Err());
             return;
         };
 
         if !output.success {
+            let _ = writer.bus_tagged(tag, DeleteUserMessage::Err());
             return;
         }
 

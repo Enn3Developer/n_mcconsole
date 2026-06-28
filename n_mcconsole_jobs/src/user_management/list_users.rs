@@ -31,14 +31,17 @@ impl Job for ListUsersJob {
                 .arg(MC_OPERATOR)
                 .arg(MC_ADMIN),
         ) else {
+            let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
             return;
         };
 
         if !output.success {
+            let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
             return;
         }
 
         let Ok(parsed_output) = String::from_utf8(output.stdout) else {
+            let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
             return;
         };
 

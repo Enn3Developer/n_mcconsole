@@ -38,10 +38,12 @@ impl Job for SetRoleJob {
                 .arg(&self.user)
                 .arg(self.role),
         ) else {
+            let _ = writer.bus_tagged(tag, SetRoleMessage::Err());
             return;
         };
 
         if !output.success {
+            let _ = writer.bus_tagged(tag, SetRoleMessage::Err());
             return;
         }
 

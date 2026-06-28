@@ -41,10 +41,12 @@ impl Job for CreateUserJob {
                 .arg(self.role),
             &self.pubkey,
         ) else {
+            let _ = writer.bus_tagged(tag, CreateUserMessage::Err());
             return;
         };
 
         if !output.success {
+            let _ = writer.bus_tagged(tag, CreateUserMessage::Err());
             return;
         }
 
