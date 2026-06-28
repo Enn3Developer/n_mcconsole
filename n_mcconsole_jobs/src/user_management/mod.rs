@@ -3,6 +3,11 @@ pub mod delete_user;
 pub mod list_users;
 pub mod set_role;
 
+pub use create_user::*;
+pub use delete_user::*;
+pub use list_users::*;
+pub use set_role::*;
+
 const HELPER: &str = "/usr/local/sbin/mcconsole-usermgmt";
 
 pub enum Role {
