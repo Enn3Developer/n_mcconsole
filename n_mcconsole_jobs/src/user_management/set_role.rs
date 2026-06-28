@@ -23,7 +23,6 @@ impl SetRoleJob {
     }
 }
 
-// TODO: error handling
 impl Job for SetRoleJob {
     fn run(
         self,

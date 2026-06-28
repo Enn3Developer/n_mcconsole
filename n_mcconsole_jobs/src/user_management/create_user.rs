@@ -25,7 +25,6 @@ impl CreateUserJob {
     }
 }
 
-// TODO: error handling
 impl Job for CreateUserJob {
     fn run(
         self,

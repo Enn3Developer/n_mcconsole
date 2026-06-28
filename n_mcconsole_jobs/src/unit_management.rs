@@ -47,7 +47,6 @@ impl UnitManagementJob {
     }
 }
 
-// TODO: error handling
 impl Job for UnitManagementJob {
     fn run(
         self,

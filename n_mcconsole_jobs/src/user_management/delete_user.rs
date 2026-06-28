@@ -19,7 +19,6 @@ impl DeleteUserJob {
     }
 }
 
-// TODO: error handling
 impl Job for DeleteUserJob {
     fn run(
         self,

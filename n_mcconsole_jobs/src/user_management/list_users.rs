@@ -15,7 +15,6 @@ pub struct ListUsersJob;
 
 job_emits!(ListUsersJob => Tagged<ListUsersMessage>);
 
-// TODO: error handling
 impl Job for ListUsersJob {
     fn run(
         self,
