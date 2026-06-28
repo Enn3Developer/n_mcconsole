@@ -1,6 +1,6 @@
 use n_mcconsole_core::command::{Command, Output};
 use n_mcconsole_core::executor::{Executor, Streaming};
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Write};
 
 pub struct LocalExecutor;
 
@@ -9,6 +9,20 @@ impl Executor for LocalExecutor {
         let o = std::process::Command::new(&cmd.program)
             .args(&cmd.args)
             .output()?;
+        Ok(Output {
+            success: o.status.success(),
+            stdout: o.stdout,
+            stderr: o.stderr,
+        })
+    }
+
+    fn run_stdin(&self, cmd: &Command, data: &[u8]) -> std::io::Result<Output> {
+        let mut child = std::process::Command::new(&cmd.program)
+            .args(&cmd.args)
+            .stdin(std::process::Stdio::piped())
+            .spawn()?;
+        child.stdin.take().unwrap().write_all(data)?;
+        let o = child.wait_with_output()?;
         Ok(Output {
             success: o.status.success(),
             stdout: o.stdout,

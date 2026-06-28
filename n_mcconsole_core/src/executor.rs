@@ -8,6 +8,7 @@ pub struct Streaming {
 
 pub trait Executor: Send + Sync {
     fn run(&self, cmd: &Command) -> io::Result<Output>;
+    fn run_stdin(&self, cmd: &Command, data: &[u8]) -> io::Result<Output>;
     fn spawn_streaming(&self, cmd: &Command) -> io::Result<Streaming>;
     fn read_file(&self, path: &str) -> io::Result<Vec<u8>>;
     fn write_file(&self, path: &str, data: &[u8]) -> io::Result<()>;

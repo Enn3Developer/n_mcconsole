@@ -34,6 +34,21 @@ impl Executor for SshExecutor {
         })
     }
 
+    fn run_stdin(&self, cmd: &Command, data: &[u8]) -> io::Result<Output> {
+        let mut child = self
+            .base()
+            .arg(Self::remote_cmdline(cmd))
+            .stdin(std::process::Stdio::piped())
+            .spawn()?;
+        child.stdin.take().unwrap().write_all(data)?;
+        let o = child.wait_with_output()?;
+        Ok(Output {
+            success: o.status.success(),
+            stdout: o.stdout,
+            stderr: o.stderr,
+        })
+    }
+
     fn spawn_streaming(&self, cmd: &Command) -> io::Result<Streaming> {
         let mut child = self
             .base()
