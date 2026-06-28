@@ -33,21 +33,21 @@ impl Job for UpdaterLogReaderJob {
             return;
         };
 
-        if let Some(token) = token.as_mut() {
-            if let Some(child) = stream.killer {
-                token.register_child(child);
-            }
+        if let Some(token) = token.as_mut()
+            && let Some(child) = stream.killer
+        {
+            token.register_child(child);
         }
 
         for line in stream.lines {
-            if token.as_ref().map_or(false, |t| t.cancelled()) {
+            if token.as_ref().is_some_and(|t| t.cancelled()) {
                 break;
             }
             let Ok(line) = line else {
                 continue;
             };
 
-            if let Err(_) = writer.bus_tagged(tag, LogLine { line }) {
+            if writer.bus_tagged(tag, LogLine { line }).is_err() {
                 break;
             }
         }

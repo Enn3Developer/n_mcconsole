@@ -1,3 +1,5 @@
+use std::os::unix::prelude::ExitStatusExt;
+
 pub mod local;
 pub mod remote;
 
@@ -31,4 +33,9 @@ pub fn parse_target() -> Target {
     }
 
     Target::Local
+}
+
+fn code_of(s: std::process::ExitStatus) -> i32 {
+    s.code()
+        .unwrap_or_else(|| 128 + s.signal().unwrap_or_default())
 }

@@ -18,7 +18,51 @@ impl Command {
 }
 
 pub struct Output {
-    pub success: bool,
+    pub code: i32,
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
+}
+
+impl Output {
+    pub fn success(&self) -> bool {
+        self.code == 0
+    }
+}
+
+pub enum Reason {
+    Transport,
+    NotAuthorized,
+    Killed(i32),
+    Usage,
+    NoCaller,
+    Tier,
+    Locked,
+    BadInput,
+    NotFound,
+    Precheck,
+    Conflict,
+    Refused,
+    Internal,
+    Unknown(i32),
+}
+
+impl Reason {
+    pub fn from_exit(code: i32) -> Self {
+        match code {
+            10 => Reason::Usage,
+            11 => Reason::NoCaller,
+            12 => Reason::Tier,
+            13 => Reason::Locked,
+            14 => Reason::BadInput,
+            15 => Reason::NotFound,
+            16 => Reason::Precheck,
+            17 => Reason::Conflict,
+            18 => Reason::Refused,
+            19 => Reason::Internal,
+            126 | 127 => Reason::NotAuthorized,
+            255 => Reason::Transport,
+            c if c >= 128 => Reason::Killed(c - 128),
+            c => Reason::Unknown(c),
+        }
+    }
 }

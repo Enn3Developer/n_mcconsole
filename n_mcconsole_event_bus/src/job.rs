@@ -76,7 +76,7 @@ impl JobControl {
         let exec = self.executor.clone();
         let writer = self.writer.clone();
         thread::spawn(move || {
-            let ok = exec.run(&cmd).map(|o| o.success).unwrap_or(false);
+            let ok = exec.run(&cmd).map(|o| o.success()).unwrap_or(false);
             let _ = writer.bus_tagged(tag, JobDone { ok });
         });
     }

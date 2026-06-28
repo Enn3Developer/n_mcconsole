@@ -34,7 +34,7 @@ impl Job for UpdateJob {
             return;
         };
 
-        if !output.success {
+        if !output.success() {
             let _ = writer.bus_tagged(tag, UpdateMessage::Err);
             return;
         }

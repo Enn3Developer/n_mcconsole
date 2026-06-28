@@ -1,3 +1,4 @@
+use crate::code_of;
 use n_mcconsole_core::command::{Command, Output};
 use n_mcconsole_core::executor::{Executor, Streaming};
 use std::io::{BufRead, BufReader, Write};
@@ -10,7 +11,7 @@ impl Executor for LocalExecutor {
             .args(&cmd.args)
             .output()?;
         Ok(Output {
-            success: o.status.success(),
+            code: code_of(o.status),
             stdout: o.stdout,
             stderr: o.stderr,
         })
@@ -24,7 +25,7 @@ impl Executor for LocalExecutor {
         child.stdin.take().unwrap().write_all(data)?;
         let o = child.wait_with_output()?;
         Ok(Output {
-            success: o.status.success(),
+            code: code_of(o.status),
             stdout: o.stdout,
             stderr: o.stderr,
         })

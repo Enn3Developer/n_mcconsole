@@ -23,7 +23,7 @@ impl Job for StatsReaderJob {
         token: Option<JobToken>,
     ) {
         loop {
-            if token.as_ref().map_or(false, |t| t.cancelled()) {
+            if token.as_ref().is_some_and(|t| t.cancelled()) {
                 break;
             }
 
@@ -42,7 +42,7 @@ impl Job for StatsReaderJob {
                 .filter_map(|l| Stats::try_from(l).ok())
                 .collect();
 
-            if let Err(_) = writer.bus(StatsReaderMessage { stats }) {
+            if writer.bus(StatsReaderMessage { stats }).is_err() {
                 break;
             }
 
@@ -74,7 +74,7 @@ impl TryFrom<&str> for Stats {
             .next()
             .unwrap_or_default()
             .split(',')
-            .map(|s| String::from(s))
+            .map(String::from)
             .collect();
 
         Ok(Self { ts, tps, players })

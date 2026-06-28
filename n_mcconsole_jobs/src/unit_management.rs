@@ -61,7 +61,7 @@ impl Job for UnitManagementJob {
             return;
         };
 
-        if !output.success {
+        if !output.success() {
             let _ = writer.bus_tagged(tag, UnitManagementMessage::Err());
             return;
         }

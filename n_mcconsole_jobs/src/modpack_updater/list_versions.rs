@@ -15,7 +15,7 @@ struct Manifest {
 
 impl Manifest {
     fn versions(&self) -> Vec<String> {
-        self.versions.keys().map(|s| s.clone()).collect()
+        self.versions.keys().cloned().collect()
     }
 
     fn gt(&self, version: &String) -> Vec<String> {
@@ -23,11 +23,7 @@ impl Manifest {
             return vec![];
         };
 
-        self.versions
-            .keys()
-            .take(index)
-            .map(|s| s.clone())
-            .collect()
+        self.versions.keys().take(index).cloned().collect()
     }
 }
 

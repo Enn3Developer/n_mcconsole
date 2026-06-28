@@ -35,7 +35,7 @@ impl Job for ListUsersJob {
             return;
         };
 
-        if !output.success {
+        if !output.success() {
             let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
             return;
         }
@@ -75,9 +75,9 @@ fn line_to_users(groups: &mut Split<char>) -> Vec<String> {
         .next()
         .unwrap()
         .split(':')
-        .last()
+        .next_back()
         .unwrap()
         .split(',')
-        .map(|s| String::from(s))
+        .map(String::from)
         .collect::<Vec<_>>()
 }

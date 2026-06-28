@@ -1,3 +1,4 @@
+use crate::code_of;
 use n_mcconsole_core::command::{Command, Output};
 use n_mcconsole_core::executor::{Executor, Streaming};
 use std::io;
@@ -28,7 +29,7 @@ impl Executor for SshExecutor {
     fn run(&self, cmd: &Command) -> io::Result<Output> {
         let o = self.base().arg(Self::remote_cmdline(cmd)).output()?;
         Ok(Output {
-            success: o.status.success(),
+            code: code_of(o.status),
             stdout: o.stdout,
             stderr: o.stderr,
         })
@@ -43,7 +44,7 @@ impl Executor for SshExecutor {
         child.stdin.take().unwrap().write_all(data)?;
         let o = child.wait_with_output()?;
         Ok(Output {
-            success: o.status.success(),
+            code: code_of(o.status),
             stdout: o.stdout,
             stderr: o.stderr,
         })
