@@ -1,7 +1,9 @@
 use n_mcconsole_core::command::Command;
 use n_mcconsole_core::executor::Executor;
+use n_mcconsole_core::message::Tagged;
 use n_mcconsole_event_bus::event::EventWriter;
 use n_mcconsole_event_bus::job::{Job, JobToken};
+use n_mcconsole_event_bus::job_emits;
 use std::sync::Arc;
 
 const HELPER: &str = "/usr/local/sbin/mcconsole-notify";
@@ -36,6 +38,8 @@ impl From<UnitAction> for String {
 pub struct UnitManagementJob {
     pub action: UnitAction,
 }
+
+job_emits!(UnitManagementJob => Tagged<UnitManagementMessage>);
 
 impl UnitManagementJob {
     pub fn new(action: UnitAction) -> Self {
