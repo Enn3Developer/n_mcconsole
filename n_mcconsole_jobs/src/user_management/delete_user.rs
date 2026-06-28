@@ -1,5 +1,5 @@
 use crate::user_management::HELPER;
-use n_mcconsole_core::command::Command;
+use n_mcconsole_core::command::{Command, Reason};
 use n_mcconsole_core::executor::Executor;
 use n_mcconsole_core::message::Tagged;
 use n_mcconsole_event_bus::event::EventWriter;
@@ -29,12 +29,12 @@ impl Job for DeleteUserJob {
         _token: Option<JobToken>,
     ) {
         let Ok(output) = executor.run(&Command::new("pkexec").arg(HELPER).arg(&self.user)) else {
-            let _ = writer.bus_tagged(tag, DeleteUserMessage::Err());
+            let _ = writer.bus_tagged(tag, DeleteUserMessage::Err(Reason::Internal));
             return;
         };
 
         if !output.success() {
-            let _ = writer.bus_tagged(tag, DeleteUserMessage::Err());
+            let _ = writer.bus_tagged(tag, DeleteUserMessage::Err(Reason::from_exit(output.code)));
             return;
         }
 
@@ -43,6 +43,6 @@ impl Job for DeleteUserJob {
 }
 
 pub enum DeleteUserMessage {
-    Err(),
+    Err(Reason),
     Ok(String),
 }

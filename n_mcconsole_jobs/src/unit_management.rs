@@ -1,4 +1,4 @@
-use n_mcconsole_core::command::Command;
+use n_mcconsole_core::command::{Command, Reason};
 use n_mcconsole_core::executor::Executor;
 use n_mcconsole_core::message::Tagged;
 use n_mcconsole_event_bus::event::EventWriter;
@@ -57,12 +57,15 @@ impl Job for UnitManagementJob {
         _token: Option<JobToken>,
     ) {
         let Ok(output) = executor.run(&Command::new("pkexec").arg(HELPER).arg(self.action)) else {
-            let _ = writer.bus_tagged(tag, UnitManagementMessage::Err());
+            let _ = writer.bus_tagged(tag, UnitManagementMessage::Err(Reason::Internal));
             return;
         };
 
         if !output.success() {
-            let _ = writer.bus_tagged(tag, UnitManagementMessage::Err());
+            let _ = writer.bus_tagged(
+                tag,
+                UnitManagementMessage::Err(Reason::from_exit(output.code)),
+            );
             return;
         }
 
@@ -71,6 +74,6 @@ impl Job for UnitManagementJob {
 }
 
 pub enum UnitManagementMessage {
-    Err(),
+    Err(Reason),
     Ok(UnitAction),
 }

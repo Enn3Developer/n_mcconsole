@@ -1,5 +1,5 @@
 use crate::modpack_updater::HELPER;
-use n_mcconsole_core::command::Command;
+use n_mcconsole_core::command::{Command, Reason};
 use n_mcconsole_core::executor::Executor;
 use n_mcconsole_core::message::Tagged;
 use n_mcconsole_event_bus::event::EventWriter;
@@ -30,12 +30,12 @@ impl Job for UpdateJob {
         _token: Option<JobToken>,
     ) {
         let Ok(output) = executor.run(&Command::new("pkexec").arg(HELPER).arg(self.version)) else {
-            let _ = writer.bus_tagged(tag, UpdateMessage::Err);
+            let _ = writer.bus_tagged(tag, UpdateMessage::Err(Reason::Internal));
             return;
         };
 
         if !output.success() {
-            let _ = writer.bus_tagged(tag, UpdateMessage::Err);
+            let _ = writer.bus_tagged(tag, UpdateMessage::Err(Reason::from_exit(output.code)));
             return;
         }
 
@@ -44,6 +44,6 @@ impl Job for UpdateJob {
 }
 
 pub enum UpdateMessage {
-    Err,
+    Err(Reason),
     Ok,
 }

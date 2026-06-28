@@ -1,4 +1,4 @@
-use n_mcconsole_core::command::Command;
+use n_mcconsole_core::command::{Command, Reason};
 use n_mcconsole_core::executor::Executor;
 use n_mcconsole_core::message::Tagged;
 use n_mcconsole_event_bus::event::EventWriter;
@@ -31,17 +31,17 @@ impl Job for ListUsersJob {
                 .arg(MC_OPERATOR)
                 .arg(MC_ADMIN),
         ) else {
-            let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
+            let _ = writer.bus_tagged(tag, ListUsersMessage::Err(Reason::Internal));
             return;
         };
 
         if !output.success() {
-            let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
+            let _ = writer.bus_tagged(tag, ListUsersMessage::Err(Reason::from_exit(output.code)));
             return;
         }
 
         let Ok(parsed_output) = String::from_utf8(output.stdout) else {
-            let _ = writer.bus_tagged(tag, ListUsersMessage::Err());
+            let _ = writer.bus_tagged(tag, ListUsersMessage::Err(Reason::Internal));
             return;
         };
 
@@ -62,7 +62,7 @@ impl Job for ListUsersJob {
 }
 
 pub enum ListUsersMessage {
-    Err(),
+    Err(Reason),
     Ok {
         viewers: Vec<String>,
         operators: Vec<String>,
