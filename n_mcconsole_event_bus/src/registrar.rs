@@ -4,6 +4,9 @@ use n_mcconsole_core::message::Message;
 use std::any::TypeId;
 use std::marker::PhantomData;
 
+/// Registrar for scenes to subscribe to messages
+///
+/// You need to implement Handle<T> for message types you wish to subscribe to
 pub struct Registrar<S> {
     pub(crate) subs: Vec<(TypeId, Thunk)>,
     _s: PhantomData<S>,

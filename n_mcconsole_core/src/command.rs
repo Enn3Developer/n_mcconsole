@@ -1,3 +1,4 @@
+/// Used to build commands to run on the system
 pub struct Command {
     pub program: String,
     pub args: Vec<String>,
@@ -17,7 +18,9 @@ impl Command {
     }
 }
 
+/// The resulting output from running a command
 pub struct Output {
+    /// Exit code of the program, if != 0 can be used to create a [Reason] to explain the error
     pub code: i32,
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
@@ -29,6 +32,7 @@ impl Output {
     }
 }
 
+/// Represents all the possible errors when running commands
 pub enum Reason {
     Transport,
     NotAuthorized,
@@ -47,6 +51,7 @@ pub enum Reason {
 }
 
 impl Reason {
+    /// Convert [Output::code] to a [Reason]
     pub fn from_exit(code: i32) -> Self {
         match code {
             10 => Reason::Usage,

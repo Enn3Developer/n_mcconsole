@@ -12,6 +12,7 @@ use ratatui::Frame;
 use ratatui::layout::Rect;
 use std::collections::HashMap;
 
+/// The central app manager, handles scenes, input and has a central bus system to deliver messages to subscribers
 pub struct App {
     scenes: HashMap<SceneId, Box<dyn Scene>>,
     order: Vec<SceneId>,
@@ -49,10 +50,14 @@ impl App {
         }
     }
 
+    /// Push messages to the event bus to later be delivered
     pub fn enqueue(&mut self, env: Envelope) {
         self.bus.queue.push_back(env);
     }
 
+    /// Register a scene
+    ///
+    /// If you want to register a scene and render it, use [App::push_scene] instead
     pub fn register_scene<S: Scene>(&mut self, scene: S) -> SceneId {
         let id = self.next_scene_id();
 
@@ -72,12 +77,14 @@ impl App {
         id
     }
 
+    /// Register a scene and push it onto the stack to render it
     pub fn push_scene<S: Scene>(&mut self, scene: S) -> SceneId {
         let id = self.register_scene(scene);
         self.order.push(id);
         id
     }
 
+    /// Remove a scene and all its children scenes
     fn remove_recursive(&mut self, id: SceneId) {
         let kids = self
             .scenes
@@ -93,11 +100,13 @@ impl App {
         self.bus.unsubscribe(id);
     }
 
+    /// Close a scene and remove it together with its children scenes
     pub fn close_scene(&mut self, id: SceneId) {
         self.order.retain(|x| *x != id);
         self.remove_recursive(id);
     }
 
+    /// Push a key event to be handled by the app
     pub fn handle_input(&mut self, key: KeyEvent) {
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
         if let (true, KeyCode::Char('c')) = (ctrl, key.code) {
@@ -155,6 +164,7 @@ impl App {
         }
     }
 
+    /// Reads all the messages in the bus and delivers to subscribers
     pub fn dispatch_all(&mut self) {
         let App {
             scenes,
@@ -193,6 +203,7 @@ impl App {
         }
     }
 
+    /// Render all the scenes in the stack
     pub fn render(&self, f: &mut Frame) {
         let area = f.area();
         let ids = self.order.clone();

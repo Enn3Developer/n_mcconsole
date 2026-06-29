@@ -6,7 +6,9 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+/// A job that can be executed through the [JobControl]
 pub trait Job: Send + 'static {
+    /// Run the job, with a specified id, an event writer, the executor and an optional cancellation token
     fn run(
         self,
         tag: u64,
@@ -16,6 +18,7 @@ pub trait Job: Send + 'static {
     );
 }
 
+/// A macro to simplify message subscriptions for scenes, jobs simply states what message they will send
 #[macro_export]
 macro_rules! job_emits {
     ($job:ty => $($msg:ty),+ $(,)?) => {
@@ -30,6 +33,7 @@ macro_rules! job_emits {
     };
 }
 
+/// Helper to spawn jobs in new threads and provide them with the needed helpers
 #[derive(Clone)]
 pub struct JobControl {
     pub writer: EventWriter,
@@ -38,10 +42,14 @@ pub struct JobControl {
 }
 
 impl JobControl {
+    /// Get a new job id
     pub fn next_id(&self) -> u64 {
         self.next.fetch_add(1, Ordering::Relaxed)
     }
 
+    /// Spawn a streaming job
+    ///
+    /// Sends Tagged<LogLine> and Tagged<JobDone>
     pub fn spawn_stream(&self, cmd: Command, tag: u64) -> JobHandle {
         let exec = self.executor.clone();
         let writer = self.writer.clone();
@@ -72,6 +80,9 @@ impl JobControl {
         JobHandle { stop, killer }
     }
 
+    /// Spawn a simple command as job
+    ///
+    /// Sends Tagged<JobDone>
     pub fn spawn_oneshot(&self, cmd: Command, tag: u64) {
         let exec = self.executor.clone();
         let writer = self.writer.clone();
@@ -81,6 +92,7 @@ impl JobControl {
         });
     }
 
+    /// Spawn a job and returns a handle
     pub fn spawn_job<J: Job>(&self, job: J, tag: u64) -> JobHandle {
         let exec = self.executor.clone();
         let writer = self.writer.clone();
@@ -99,6 +111,7 @@ impl JobControl {
         JobHandle { stop, killer }
     }
 
+    /// Spawn a job detached from this thread
     pub fn spawn_detached<J: Job>(&self, job: J, tag: u64) {
         let exec = self.executor.clone();
         let writer = self.writer.clone();
@@ -108,6 +121,7 @@ impl JobControl {
         });
     }
 
+    /// Spawn a job, returns its id and handle
     pub fn start<J: Job>(&self, job: J) -> RunningJob {
         let tag = self.next_id();
         let handle = self.spawn_job(job, tag);
@@ -117,6 +131,7 @@ impl JobControl {
         }
     }
 
+    /// Spawn a detached job, returns its id
     pub fn start_detached<J: Job>(&self, job: J) -> RunningJob {
         let tag = self.next_id();
         self.spawn_detached(job, tag);
@@ -124,6 +139,7 @@ impl JobControl {
     }
 }
 
+/// A cancellation token for jobs
 #[derive(Clone)]
 pub struct JobToken {
     stop: Arc<AtomicBool>,
@@ -135,6 +151,7 @@ impl JobToken {
         self.stop.load(Ordering::Relaxed)
     }
 
+    /// Use this method to register child process if available
     pub fn register_child(&self, child: std::process::Child) {
         *self.killer.lock().unwrap() = Some(child);
     }

@@ -15,12 +15,14 @@ pub mod outbox;
 pub mod registrar;
 pub mod scene;
 
+/// A context used to provide helpers and information
 pub struct Ctx<'a> {
     pub executor: &'a dyn Executor,
     pub config: &'a Config,
     pub jobs: &'a JobControl,
 }
 
+/// Handler for a specific message type
 pub trait Handle<T: Message> {
     fn handle(&mut self, msg: &T, ctx: &Ctx, out: &mut Outbox);
 }
